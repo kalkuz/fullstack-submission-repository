@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { useEffect, useState } from 'react';
 import {
   getAll, create, update, del,
@@ -47,7 +48,7 @@ const Persons = ({
         value="Delete"
         onClick={() => {
           if (window.confirm('Are you sure you want to delete this person?')) {
-            del(person.id).then(() => {
+            del(person._id).then(() => {
               setMessage({ type: 'success', message: `Successfully deleted ${person.name}` });
               onDelete();
             }).catch(() => setMessage({ type: 'error', message: `An error has occurred while deleting ${person.name}` }));
@@ -79,20 +80,20 @@ function App() {
 
   const [message, setMessage] = useState(null);
 
-  const GetPersons = () => getAll().then((data) => setPersons(data));
+  const GetPersons = () => getAll().then(({ data }) => setPersons(data));
   const CreatePerson = (newObj) => create(newObj)
     .then(() => {
       setMessage({ type: 'success', message: `Added ${newObj.name}` });
       GetPersons();
     })
-    .catch(() => setMessage({ type: 'error', message: `Could not create ${newObj.name}` }));
+    .catch((err) => setMessage({ type: 'error', message: err.response.data.error }));
 
   const HandleSubmit = () => {
     const person = persons.find((p) => p.name === newName);
     if (person) {
       // alert(`${newName} is already added to the phonebook`);
       if (window.confirm(`${newName} is already added to the phonebook. Do you want to update the number?`)) {
-        update(person.id, { ...person, number: newNumber }).then(() => {
+        update(person._id, { ...person, number: newNumber }).then(() => {
           GetPersons();
           setMessage({ type: 'success', message: `Updated ${person.name}` });
         })
